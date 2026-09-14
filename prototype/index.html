@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Promotion Assist v0 — 告知パック生成器</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Promotion Assist v0</h1>
+    <span class="tag">作品を更新したら、SNS ごとの告知文と宣伝画像を 30 秒で。データはこの端末の中だけに保存されます。</span>
+  </header>
+
+  <main>
+    <!-- 1. 作品 -->
+    <section class="panel col-work">
+      <h2><span class="step">1</span>作品</h2>
+      <div class="works-list">
+        <label for="workSelect">保存済みの作品</label>
+        <div class="row">
+          <select id="workSelect"><option value="">（新しい作品）</option></select>
+          <button id="deleteWork" class="small narrow" type="button">削除</button>
+        </div>
+      </div>
+
+      <label for="site">掲載サイト</label>
+      <select id="site">
+        <option value="narou">小説家になろう</option>
+        <option value="kakuyomu">カクヨム</option>
+        <option value="alphapolis">アルファポリス</option>
+        <option value="pixiv">pixiv</option>
+        <option value="kindle">Kindle</option>
+        <option value="other">その他</option>
+      </select>
+
+      <div id="narouBox">
+        <label for="ncode">ncode または作品 URL（任意）</label>
+        <div class="row">
+          <input id="ncode" type="text" placeholder="n1234ab / https://ncode.syosetu.com/n1234ab/">
+          <button id="fetchNarou" class="small narrow" type="button">API から取得</button>
+        </div>
+        <div id="narouStatus" class="hint">取得に失敗しても手入力で続けられます。</div>
+      </div>
+
+      <label for="title">作品タイトル</label>
+      <input id="title" type="text" placeholder="作品タイトル" required>
+      <label for="workUrl">作品 URL</label>
+      <input id="workUrl" type="url" placeholder="https://">
+      <label for="writer">作者名</label>
+      <input id="writer" type="text" placeholder="作者名">
+      <label for="synopsis">あらすじ（画像や将来のテンプレートで使用・任意）</label>
+      <textarea id="synopsis"></textarea>
+
+      <details>
+        <summary>SNS 別タグ（カンマ区切り）</summary>
+        <label for="tagsX">X</label><input id="tagsX" type="text" placeholder="narou, 創作">
+        <label for="tagsBluesky">Bluesky</label><input id="tagsBluesky" type="text" placeholder="創作, Web小説">
+        <label for="tagsThreads">Threads（1 個推奨）</label><input id="tagsThreads" type="text" placeholder="小説家になろう">
+        <label for="tagsMisskey">Misskey</label><input id="tagsMisskey" type="text" placeholder="創作">
+        <label for="tagsMastodon">Mastodon</label><input id="tagsMastodon" type="text" placeholder="創作">
+      </details>
+
+      <details>
+        <summary>投稿先サーバー</summary>
+        <label for="misskeyHost">Misskey サーバー</label><input id="misskeyHost" type="text" placeholder="misskey.io">
+        <label for="mastodonHost">Mastodon サーバー</label><input id="mastodonHost" type="text" placeholder="mastodon.social">
+      </details>
+
+      <div class="row" style="margin-top:10px">
+        <button id="saveWork" class="primary" type="button">作品を保存</button>
+      </div>
+      <div id="workStatus" class="hint"></div>
+    </section>
+
+    <!-- 2. 今回の更新 -->
+    <section class="panel col-ep">
+      <h2><span class="step">2</span>今回の更新</h2>
+      <label for="kind">告知の種類</label>
+      <select id="kind">
+        <option value="update">更新（新しい話）</option>
+        <option value="new">新作公開</option>
+        <option value="complete">完結</option>
+      </select>
+      <div class="row">
+        <div><label for="epNo">話数</label><input id="epNo" type="number" min="1" placeholder="12"></div>
+        <div><label for="epNoTo">〜話（まとめて更新時）</label><input id="epNoTo" type="number" min="1" placeholder=""></div>
+      </div>
+      <label for="epTitle">話のタイトル</label>
+      <input id="epTitle" type="text" placeholder="第12話のタイトル">
+      <label for="epUrl">話の URL（空なら作品 URL）</label>
+      <input id="epUrl" type="url" placeholder="https://">
+      <label for="hook">ひとこと（本文に入る 1〜2 文）</label>
+      <textarea id="hook" placeholder="今回は主人公が初めて街を出ます。"></textarea>
+      <label for="excerpt">冒頭抜粋（画像用・自分の本文を貼り付け）</label>
+      <textarea id="excerpt" placeholder="本文の冒頭 100〜200 字を貼り付けると縦書きカードになります。"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="generate" class="primary" type="button">告知パックを生成</button>
+      </div>
+      <div id="genStatus" class="hint"></div>
+
+      <h2 style="margin-top:18px"><span class="step">4</span>履歴</h2>
+      <ul id="history" class="history"></ul>
+      <div class="row" style="margin-top:8px">
+        <button id="exportJson" class="small" type="button">JSON を書き出す</button>
+        <label class="small" style="margin:0">
+          <input id="importJson" type="file" accept="application/json" style="display:none">
+          <button id="importBtn" class="small" type="button">JSON を読み込む</button>
+        </label>
+      </div>
+    </section>
+
+    <!-- 3. 出力 -->
+    <section class="panel col-out">
+      <h2><span class="step">3</span>告知パック</h2>
+      <div id="posts"></div>
+
+      <h2 style="margin-top:14px">宣伝画像</h2>
+      <div class="image-tools">
+        <div><label for="tpl">テンプレート</label>
+          <select id="tpl"><option value="excerpt">縦書き冒頭カード</option><option value="banner">話数バナー</option></select></div>
+        <div><label for="size">サイズ</label>
+          <select id="size"><option value="card">1200×630（リンクカード）</option><option value="portrait">1080×1350（4:5）</option></select></div>
+        <div><label for="theme">配色</label>
+          <select id="theme"><option value="paper">和紙</option><option value="night">夜</option><option value="sakura">桜</option></select></div>
+        <div class="row">
+          <button id="downloadPng" class="small" type="button">PNG を保存</button>
+          <button id="copyPng" class="small" type="button">画像をコピー</button>
+        </div>
+      </div>
+      <canvas id="card" width="1200" height="630" aria-label="宣伝画像プレビュー"></canvas>
+      <div id="cardStatus" class="hint"></div>
+    </section>
+  </main>
+
+  <footer>
+    このプロトタイプはサーバーを持ちません。入力内容と履歴はブラウザの localStorage にのみ保存されます。
+    投稿は各 SNS の公式「共有」画面を開くだけで、自動では送信されません。
+  </footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
