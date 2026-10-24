@@ -47,3 +47,7 @@ npm run dev   # http://localhost:8080 で起動
 1. v0 を静的ホスティング（GitHub Pages 等）で公開し、作家 10 名に使ってもらう（`docs/05_v0_scope.md` 4 章の検証計画）。
 2. 実機でなろう API（JSONP）の疎通と、iOS Safari での画像コピー挙動を確認する。
 3. 検証結果に応じて、`docs/04_risk_assessment.md` 4 章の判断基準を満たすものから API 連携（Bluesky 自動投稿、なろう更新検知）を検討する。`docs/03_spec.md` はその際の将来像として保持。
+
+## 別プロジェクト: ロケット設計局（`rocket_game/`）
+
+制約に基づいて部品を配置・設定するロケット設計・打ち上げパズルのプロトタイプです。詳細は [rocket_game/README.md](rocket_game/README.md) と [rocket_game/docs/design.md](rocket_game/docs/design.md) を参照してください。

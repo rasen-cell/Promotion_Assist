@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ロケット設計局</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <button class="brand" id="home" type="button" aria-label="ミッション一覧へ">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">ロケット設計局</span>
+      <span class="brand-sub">惑星ホーム 打ち上げ設計室</span>
+    </button>
+    <div class="mast-stats" id="mastStats"></div>
+  </div>
+</header>
+
+<main id="app">
+  <section id="viewMissions" class="view" aria-labelledby="missionsTitle">
+    <div class="intro">
+      <h1 id="missionsTitle">発注一覧</h1>
+      <p>依頼主から預かったペイロードを、指定の軌道まで運ぶ機体を設計します。部品は自由に置くのではなく、直径・推進剤・強度・予算の制約の中で組み合わせます。打ち上げは自動です。事前に入力した飛行計画どおりに飛び、途中で壊れたり軌道が外れたりすれば失敗です。</p>
+    </div>
+    <ol class="mission-list" id="missionList"></ol>
+    <details class="rules" id="rulesPanel">
+      <summary>設計規則と物理モデル</summary>
+      <div class="rules-body" id="rulesBody"></div>
+    </details>
+  </section>
+
+  <section id="viewWork" class="view" hidden>
+    <div class="work-head">
+      <div class="work-title">
+        <p class="eyebrow" id="workClient"></p>
+        <h1 id="workTitle"></h1>
+        <p class="brief" id="workBrief"></p>
+      </div>
+      <dl class="req" id="workReq"></dl>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="作業工程">
+      <button role="tab" id="tabDesign" aria-controls="paneDesign" aria-selected="true" type="button"><span class="tab-step">1</span>機体設計</button>
+      <button role="tab" id="tabPlan" aria-controls="panePlan" aria-selected="false" type="button"><span class="tab-step">2</span>飛行計画</button>
+      <button role="tab" id="tabFlight" aria-controls="paneFlight" aria-selected="false" type="button"><span class="tab-step">3</span>打ち上げ</button>
+    </nav>
+
+    <div class="workspace">
+      <aside class="drawing" aria-label="機体側面図">
+        <div class="drawing-head">
+          <span>側面図</span>
+          <span class="drawing-dim" id="drawingDim"></span>
+        </div>
+        <div id="rocketView" class="rocket-view"></div>
+        <p class="drawing-note" id="drawingNote"></p>
+      </aside>
+
+      <div class="panes">
+        <div id="paneDesign" role="tabpanel" aria-labelledby="tabDesign" class="pane">
+          <div class="pane-grid">
+            <form id="designForm" class="sheet" autocomplete="off"></form>
+            <div class="analysis" id="analysis"></div>
+          </div>
+          <details class="catalog" id="catalogPanel">
+            <summary>部品カタログ（このミッションで使える部品）</summary>
+            <div id="catalogBody" class="catalog-body"></div>
+          </details>
+        </div>
+
+        <div id="panePlan" role="tabpanel" aria-labelledby="tabPlan" class="pane" hidden>
+          <div class="pane-grid">
+            <form id="planForm" class="sheet" autocomplete="off"></form>
+            <div class="analysis" id="planSide"></div>
+          </div>
+        </div>
+
+        <div id="paneFlight" role="tabpanel" aria-labelledby="tabFlight" class="pane" hidden>
+          <div id="flightEmpty" class="empty">
+            <p>まだ打ち上げていません。飛行計画を確認して「打ち上げ」を押してください。</p>
+          </div>
+          <div id="flightBody" hidden>
+            <div class="verdict" id="verdict"></div>
+            <div class="flight-grid">
+              <div class="scope">
+                <canvas id="trajCanvas" class="traj" aria-label="飛行経路"></canvas>
+                <div class="hud" id="hud"></div>
+                <div class="playback">
+                  <button type="button" id="btnPlay" class="btn small">一時停止</button>
+                  <label class="speed">速度
+                    <select id="playSpeed">
+                      <option value="5">×5</option>
+                      <option value="20" selected>×20</option>
+                      <option value="60">×60</option>
+                    </select>
+                  </label>
+                  <button type="button" id="btnSkip" class="btn small ghost">最後まで</button>
+                </div>
+              </div>
+              <div class="charts">
+                <canvas id="chAlt" class="chart"></canvas>
+                <canvas id="chVel" class="chart"></canvas>
+                <canvas id="chQ" class="chart"></canvas>
+                <canvas id="chG" class="chart"></canvas>
+              </div>
+            </div>
+            <div class="flight-lower">
+              <section class="log-wrap" aria-labelledby="logTitle">
+                <h2 id="logTitle">飛行ログ</h2>
+                <ol class="log" id="flightLog"></ol>
+              </section>
+              <section class="report" id="report" aria-label="判定と荷重"></section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
